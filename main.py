@@ -50,7 +50,8 @@ def start_simple_test(category):
 		click.secho('\nНедостатня кількість слів, потрібно хочаб 5 слова для початку!', fg="red")
 		exit()
 
-	#random.shuffle(words)
+	words = list(words)
+	random.shuffle(words)
 	mistakes = 0
 
 	for word in words:
@@ -60,28 +61,33 @@ def start_simple_test(category):
 		user_choice = [word.original]
 		click.secho('Виберіть правильний переклад до слова "%s":' % click.style(word.translate, fg='green'), bold=True)
 		
-		for i in range(random.randint(1, 4)):
+		for i in range(random.randint(1, 4)): # Випадкова кількість варіантів яка буде згенерована.
 			original = random.choice(words).original
 			if not original in user_choice:
 				user_choice.append(original)
 
 		random.shuffle(user_choice)
+		len_user_choice = len(user_choice)
 
 		for element in user_choice:
-			click.echo('[' + str(user_choice.index(element)) + '] %s' % element.upper())
+			click.echo('[' + str(user_choice.index(element)+1) + '] %s' % element.upper())
 
-		answer = input()
+		while True:
+			if (not keyboard.read_event()): continue
+			else: 
+				answer = keyboard.read_event().name
+				break
+				
+		try: answer = int(answer)
+		except: 
+			answer = len_user_choice**2
 
-		if int(answer) >= len(user_choice):
-			mistakes +=1
-			continue
-
-		if (user_choice[int(answer)] == word.original): continue
-		else:
+		if (answer > len_user_choice or user_choice[answer-1] != word.original):
 			click.clear()
 			mistakes += 1
 			click.secho('Невірна відповідь, повинно бути %s!' % click.style(word.original, fg='green', bold=True), fg='red')
 			time.sleep(3) # Затримка після відображення помилки.
+		else: continue
 
 	click.clear()
 	click.secho('Пройдено, кількість помилок: ' + str(mistakes) + '/' + str(len(words)), fg='red', bold=True)
